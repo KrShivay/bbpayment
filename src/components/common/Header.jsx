@@ -1,14 +1,14 @@
 import React from "react";
-import { FaIndianRupeeSign } from "react-icons/fa6";
-import { GrNotes } from "react-icons/gr";
-import { IoMdCash } from "react-icons/io";
-import { MdPayments } from "react-icons/md";
+import {FaIndianRupeeSign} from "react-icons/fa6";
+import {GrNotes} from "react-icons/gr";
+import {IoMdCash} from "react-icons/io";
+import {MdPayments} from "react-icons/md";
 
 export default function Header() {
   return (
     <>
       <div className="container text-white pt-2">
-        <div className="bg-primary bg-custom-image bg-cover bg-center w-20 text-base font-semibold text-center py-2  rounded-md ">
+        <div className="bg-primary bg-custom-image bg-cover bg-center w-20 text-white font-semibold text-center py-2 rounded-md ">
           HOME
         </div>
         <div className="my-3 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
