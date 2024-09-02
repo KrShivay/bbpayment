@@ -1,6 +1,7 @@
 import {Card, Grid, Typography} from "@mui/material";
 import React, {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
+import {useLocation} from "react-router-dom";
 import DynamicForm from "../components/dynamicForm";
 import Header from "../components/header";
 import BackToHome from "../components/header/backToHome";
@@ -14,7 +15,14 @@ import {
   paymentTokenApi,
 } from "../redux";
 import {toTitleCase} from "../utils/helper";
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 function Home() {
+  const query = useQuery();
+  const userId = query.get("uId");
   const dispatch = useDispatch();
   const {
     paymentAuthToken,
@@ -29,7 +37,7 @@ function Home() {
 
   useEffect(() => {
     if (!paymentAuthToken) {
-      dispatch(paymentTokenApi());
+      dispatch(paymentTokenApi(userId));
     } else {
       dispatch(billCategoriesApi({authToken: paymentAuthToken}));
     }
@@ -77,7 +85,6 @@ function Home() {
             <Typography variant="h6" color="primary" className="my-2">
               {toTitleCase(selectedSubBiller.billerName)} Biller Form
             </Typography>
-            {console.log({selectedSubBiller})}
             <DynamicForm data={selectedSubBiller?.customerParams || []} />
           </Card>
         </Grid>

@@ -10,7 +10,7 @@ export default function BackToHome() {
     >
       <Button
         variant="outlined"
-        className="bg-primary bg-custom-image bg-cover bg-center text-white"
+        className="!bg-primary bg-custom-image bg-cover bg-center !text-white"
       >
         HOME
       </Button>

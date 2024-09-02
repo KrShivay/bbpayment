@@ -31,7 +31,7 @@ function SearchableList({data, loading}) {
     return <CircularProgress />;
   }
   return (
-    <div className="border-primary-light rounded-md border-2">
+    <div className="rounded-md border">
       <TextField
         label="Search"
         variant="outlined"

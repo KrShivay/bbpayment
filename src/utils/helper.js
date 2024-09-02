@@ -13,14 +13,16 @@ export function toTitleCase(str) {
 }
 
 export function convertCustomerData(input) {
-  // Extract the key and value from the input object
-  const [key, value] = Object.entries(input)[0];
+  const output = [];
+  let index = 1;
 
-  // Return the transformed array
-  return [
-    {
-      CustParam1Name: key,
-      CustParam1Value: value,
-    },
-  ];
+  for (const [key, value] of Object.entries(input)) {
+    output.push({
+      [`CustParam${index}Name`]: key,
+      [`CustParam${index}Value`]: value,
+    });
+    index++;
+  }
+
+  return output;
 }

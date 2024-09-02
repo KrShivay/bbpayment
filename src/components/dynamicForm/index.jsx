@@ -2,9 +2,16 @@ import {Button, Grid, TextField, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
 import {useDispatch, useSelector} from "react-redux";
-import {billDataApi, resetBillModalState} from "../../redux";
+import {
+  billDataApi,
+  resetBillModalState,
+  setState,
+  submitBillApi,
+} from "../../redux";
 import {convertCustomerData} from "../../utils/helper";
 import BillModal from "../billModal";
+import ContainerModal from "../containerModal";
+import Receipt from "../receipt";
 
 const DynamicForm = ({data}) => {
   const {
@@ -14,15 +21,69 @@ const DynamicForm = ({data}) => {
     formState: {errors},
   } = useForm();
   const dispatch = useDispatch();
-  const {paymentAuthToken, selectedSubBiller, billDataResponse} = useSelector(
-    (state) => state.bbpsSlice
-  );
+  const {
+    paymentAuthToken,
+    selectedSubBiller,
+    billDataResponse,
+    amountValue,
+    billerRequestData,
+    displayAmountValue,
+    txnSlip,
+  } = useSelector((state) => state.bbpsSlice);
   const [open, setOpen] = useState(false);
+  const [openOtpModal, setOpenOtpModal] = useState(false);
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
     dispatchEvent(resetBillModalState());
   };
+
+  const [openReceipt, setOpenReceipt] = useState(false);
+
+  const handleOpenReceipt = () => setOpenReceipt(true);
+  const handleCloseReceipt = () => {
+    dispatch(setState({txnSlip: []}));
+    setOpenReceipt(false);
+  };
+
+  const handleSubmitBillAmount = () => {
+    setOpen(false);
+    // handleOpenOtpModal();
+    const payload = {
+      localDateTime: new Date().getTime(),
+      latitude: sessionStorage.getItem("latitude"),
+      longitude: sessionStorage.getItem("longitude"),
+      deviceFingerprint: sessionStorage.getItem("fingerprint"),
+      ipAddress: sessionStorage.getItem("ip"),
+      operatorId: selectedSubBiller?.billerId,
+      operatorAccount: billDataResponse?.payload?.accountHolderName,
+      amount: amountValue,
+      billAmount: displayAmountValue,
+      billRequestForm: billerRequestData,
+      billerCategory: selectedSubBiller?.billerCategory,
+      refId: billDataResponse?.refId,
+      requestFrom: "WEB",
+      serviceType: "BILL_PAYMENT",
+    };
+    const headers = {
+      authToken: paymentAuthToken,
+    };
+    dispatch(submitBillApi({payload, headers}));
+  };
+
+  // const handleSubmitOtp = (otp) => {
+  //   // Handle OTP submission logic here
+  //   console.log("Submitted OTP:", otp);
+  //   setOpenOtpModal(false);
+  // };
+
+  // const handleOpenOtpModal = () => setOpenOtpModal(true);
+
+  // const handleCloseOtpModal = () => {
+  //   setOpenOtpModal(false);
+  //   dispatchEvent(resetBillModalState());
+  // };
 
   const onSubmit = (formData) => {
     const payload = {
@@ -30,12 +91,17 @@ const DynamicForm = ({data}) => {
       latitude: sessionStorage.getItem("latitude"),
       longitude: sessionStorage.getItem("longitude"),
       deviceFingerprint: sessionStorage.getItem("fingerprint"),
-      transactionDate: Date.now(),
-      isAddress: sessionStorage.getItem("ip"),
+      transactionDate: new Date().getTime(),
+      ipAddress: sessionStorage.getItem("ip"),
       operatorId: selectedSubBiller?.billerId,
-      requestFrom: "web",
+      requestFrom: "WEB",
       serviceType: "BILL_FETCH",
     };
+    dispatch(
+      setState({
+        billerRequestData: payload.billerRequestData,
+      })
+    );
     const headers = {authToken: paymentAuthToken};
     dispatch(billDataApi({payload, headers}));
     // handleOpen();
@@ -48,7 +114,14 @@ const DynamicForm = ({data}) => {
   }, [billDataResponse]);
 
   useEffect(() => {
+    if (txnSlip?.length > 0) {
+      handleOpenReceipt();
+    }
+  }, [txnSlip]);
+
+  useEffect(() => {
     reset();
+    // dispatch(resetBillModalState());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
@@ -59,7 +132,10 @@ const DynamicForm = ({data}) => {
         name={field.paramName}
         control={control}
         rules={{
-          required: !field.optional ? `${field.paramName} is required` : false,
+          required:
+            field.optional === false || field.optional === "false"
+              ? `${field.paramName} is required`
+              : false,
           minLength: field.minLength
             ? {
                 value: field.minLength,
@@ -124,7 +200,21 @@ const DynamicForm = ({data}) => {
           </Grid>
         </Grid>
       </form>
-      <BillModal open={open} handleClose={handleClose} />
+      <BillModal
+        open={open}
+        handleClose={handleClose}
+        handleSubmit={handleSubmitBillAmount}
+      />
+      {/* <OTPModal
+        open={openOtpModal}
+        handleClose={handleCloseOtpModal}
+        handleSubmit={handleSubmitOtp}
+      /> */}
+      <ContainerModal
+        component={<Receipt />}
+        open={openReceipt}
+        handleClose={handleCloseReceipt}
+      />
     </>
   );
 };

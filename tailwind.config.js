@@ -2,9 +2,9 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   corePlugins: {
-    preflight: false,
+    preflight: true,
   },
-  important: "#root",
+  // important: "#root",
   theme: {
     extend: {
       colors: {

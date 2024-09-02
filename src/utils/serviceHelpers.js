@@ -4,7 +4,6 @@ export const successService = (resp) =>
   resp?.apiResponseCode == 200 && resp?.apiResponseData?.responseCode == 200;
 
 export const errorService = (resp, hide) => {
-  console.log({ resp });
   if (!hide) {
     Swal.fire({
       title: "Error!",

@@ -16,7 +16,6 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
   bgcolor: "background.paper",
   boxShadow: 24,
   borderRadius: 5,
@@ -31,7 +30,7 @@ const getErrorMessage = (amount) => {
   }
 };
 
-function BillModal({open, handleClose}) {
+function BillModal({open, handleClose, handleSubmit}) {
   const {
     billDataResponse,
     billerRequestData,
@@ -68,64 +67,50 @@ function BillModal({open, handleClose}) {
             </Typography>
             <IconButton onClick={handleClose}>x</IconButton>
           </Box>
-          <div style={{maxHeight: "50vh", overflow: "scroll"}}>
+          <div style={{maxHeight: "60vh", overflow: "scroll"}}>
             <table
-              className="tw-w-full tw-border tw-border-gray-600 tw-mb-4"
-              style={{maxHeight: "50vh"}}
+              className="w-full border border-primary-light mb-4"
+              style={{maxHeight: "60vh"}}
             >
-              <tbody style={{maxHeight: "50vh"}}>
+              <tbody style={{maxHeight: "60vh"}}>
                 <tr>
-                  <th
-                    align="left"
-                    className="tw-border tw-border-gray-600 tw-p-4"
-                  >
+                  <th align="left" className="border border-primary-light p-2">
                     {billerRequestData[0]?.CustParam1Name}
                   </th>
-                  <td className="tw-border tw-border-gray-600 tw-p-4">
+                  <td className="border border-primary-light p-2">
                     {billerRequestData[0]?.CustParam1Value}
                   </td>
                 </tr>
+
                 <tr>
-                  <th
-                    align="left"
-                    className="tw-border tw-border-gray-600 tw-p-4"
-                  >
+                  <th align="left" className="border border-primary-light p-2">
                     Account Holder Name
                   </th>
-                  <td className="tw-border tw-border-gray-600 tw-p-4">
+                  <td className="border border-primary-light p-2">
                     {billDataResponse?.payload?.accountHolderName}
                   </td>
                 </tr>
                 <tr>
-                  <th
-                    align="left"
-                    className="tw-border tw-border-gray-600 tw-p-4"
-                  >
+                  <th align="left" className="border border-primary-light p-2">
                     Bill Number
                   </th>
-                  <td className="tw-border tw-border-gray-600 tw-p-4">
+                  <td className="border border-primary-light p-2">
                     {billDataResponse?.payload?.refId}
                   </td>
                 </tr>
                 <tr>
-                  <th
-                    align="left"
-                    className="tw-border tw-border-gray-600 tw-p-4"
-                  >
+                  <th align="left" className="border border-primary-light p-2">
                     Biller Name
                   </th>
-                  <td className="tw-border tw-border-gray-600 tw-p-4">
+                  <td className="border border-primary-light p-2">
                     {selectedSubBiller?.billerName}
                   </td>
                 </tr>
                 <tr>
-                  <th
-                    align="left"
-                    className="tw-border tw-border-gray-600 tw-p-4"
-                  >
+                  <th align="left" className="border border-primary-light p-2">
                     Bill Date
                   </th>
-                  <td className="tw-border tw-border-gray-600 tw-p-4">
+                  <td className="border border-primary-light p-2">
                     {billDataResponse?.txnDateTime}
                   </td>
                 </tr>
@@ -133,11 +118,11 @@ function BillModal({open, handleClose}) {
                   <tr>
                     <th
                       align="left"
-                      className="tw-border tw-border-gray-600 tw-p-4"
+                      className="border border-primary-light p-2"
                     >
                       Due Date
                     </th>
-                    <td className="tw-border tw-border-gray-600 tw-p-4">
+                    <td className="border border-primary-light p-2">
                       {format(
                         new Date(billDataResponse?.payload?.dueDate),
                         "dd-MM-yyyy"
@@ -146,24 +131,18 @@ function BillModal({open, handleClose}) {
                   </tr>
                 ) : null}
                 <tr>
-                  <th
-                    align="left"
-                    className="tw-border tw-border-gray-600 tw-p-4"
-                  >
+                  <th align="left" className="border border-primary-light p-2">
                     Amount
                   </th>
-                  <td className="tw-border tw-border-gray-600 tw-p-4">
+                  <td className="border border-primary-light p-2">
                     {displayAmountValue ?? 0}
                   </td>
                 </tr>
                 <tr>
-                  <th
-                    align="left"
-                    className="tw-border tw-border-gray-600 tw-p-4"
-                  >
+                  <th align="left" className="border border-primary-light p-2">
                     Total Amount
                   </th>
-                  <td className="tw-border tw-border-gray-600 tw-p-4">
+                  <td className="border border-primary-light p-2">
                     {displayAmountValue ?? 0}
                   </td>
                 </tr>
@@ -179,7 +158,6 @@ function BillModal({open, handleClose}) {
             onInput={(e) => {
               var textInput = e.target.value.slice(0, 8);
               textInput = textInput.replace(/[^0-9.]/g, "");
-
               e.target.value = textInput;
               const le = e.target.value;
               const len = le?.toString()?.split(".")[0]?.length;
@@ -238,14 +216,14 @@ function BillModal({open, handleClose}) {
             helperText={amountError ? getErrorMessage(amountError) : ""}
             variant="outlined"
             fullWidth
-            className="tw-px-4 tw-text-sm"
+            className="px-4 text-sm"
           />
           <Box mt={2} textAlign="center">
             <Button
               variant="contained"
               color="secondary"
               className="!text-white"
-              onClick={handleClose}
+              onClick={handleSubmit}
             >
               Pay Bill
             </Button>

@@ -5,14 +5,15 @@ import {
   billData,
   billerForCategories,
   paymentToken,
+  submitBill,
 } from "../service";
 import {errorService, successService} from "../utils/serviceHelpers";
 import showSwal from "../utils/swal";
 
 export const paymentTokenApi = createAsyncThunk(
   "bbpsSlice/paymentTokenApi",
-  async () =>
-    paymentToken().then((resp) => ({
+  async (userId) =>
+    paymentToken(userId).then((resp) => ({
       ...resp,
     }))
 );
@@ -38,35 +39,18 @@ export const billDataApi = createAsyncThunk(
   "bbpsSlice/billDataApi",
   async ({payload, headers}) => {
     return billData(payload, headers).then((resp) => ({
-      // ...resp,
-      apiResponseCode: 200,
-      apiResponseMessage: "Success",
-      apiResponseFrom: "GET BILLER LIST : BILL PAY CONTR",
-      apiResponseDateTime: "2024-08-06T16:47:49.804Z",
-      apiResponseData: {
-        responseCode: 200,
-        responseMessage: "Success",
-        responseData: {
-          billData: {
-            txnDateTime: "06-08-2024 21:23:13",
-            responseCode: "200",
-            responseMessage: "Success",
-            responseFrom: "RBLS",
-            txnResponse: {
-              responseCode: "200",
-              responseMessage: "SUCCESS",
-              merchnatID: "6",
-              subMerchnatID: "726963",
-              rmn: "",
-              urn: "2421921239054",
-              txnSlip: "",
-              billDetails:
-                '{"code":200,"payload":{"billerId":"IDFC00000NATXM","amount":100,"additionalParams":{"Available Recharge Limit":"9360","tagId":"34161FA820328EE830E4AC60","Available Balance":"640","vehicleClass":"4","vehicleClassDesc":"Car / Jeep / Van","status":"Activated"},"dueDate":"1900-01-01","requestTimeStamp":"2024-08-06","approvalRefNum":"470542462","billDate":"1900-01-01","refId":"446F09AE8BE74D3888A038AF9B842192123","billNumber":"NA","accountHolderName":"id fc","amountDetails":null,"billPeriod":"NA"},"status":"SUCCESS"}',
-              refID: "446F09AE8BE74D3888A038AF9B842192123",
-            },
-          },
-        },
-      },
+      ...resp,
+    }));
+  }
+);
+
+// submitBill
+
+export const submitBillApi = createAsyncThunk(
+  "bbpsSlice/submitBillApi",
+  async ({payload, headers}) => {
+    return submitBill(payload, headers).then((resp) => ({
+      ...resp,
     }));
   }
 );
@@ -88,6 +72,8 @@ const bbpsSlice = createSlice({
     displayAmountValue: 0,
     amountValue: 0,
     amountError: false,
+    submitBillLoading: false,
+    txnSlip: [],
   },
   reducers: {
     resetPaymentToken: (state, _action) => {
@@ -108,6 +94,9 @@ const bbpsSlice = createSlice({
       state.displayAmountValue = 0;
       state.amountValue = 0;
       state.amountError = false;
+    },
+    resetTxnSlip: (state, _action) => {
+      state.txnSlip = [];
     },
     setState: (state, action) => {
       const key = Object.keys(action.payload);
@@ -192,7 +181,6 @@ const bbpsSlice = createSlice({
       if (successService(resp)) {
         const billerForCategoriesList =
           resp?.apiResponseData?.responseData?.billers;
-        console.log({billerForCategoriesList});
         if (!billerForCategoriesList?.length > 0) {
           showSwal({
             icon: "info",
@@ -223,9 +211,16 @@ const bbpsSlice = createSlice({
       state.billDataApiLoading = false;
       const resp = actions.payload;
       if (successService(resp)) {
-        const billDataResponse =
-          resp?.apiResponseData?.responseData?.billDetails;
-        if (!billDataResponse?.length > 0) {
+        // const billDataResponse = resp?.apiResponseData?.responseData?.billData;
+        const billDataResponse = {
+          ...JSON.parse(
+            resp?.apiResponseData?.responseData?.billData.txnResponse
+              .billDetails
+          ),
+          txnDateTime:
+            resp?.apiResponseData?.responseData?.billData.txnDateTime,
+        };
+        if (!Object.keys(billDataResponse)?.length > 0) {
           showSwal({
             icon: "info",
             message:
@@ -273,6 +268,36 @@ const bbpsSlice = createSlice({
     builder.addCase(billDataApi.rejected, (state, _actions) => {
       state.billDataApiLoading = false;
       state.billDataResponse = [];
+    });
+
+    // ------------------- submitBillApi -------------------
+
+    builder.addCase(submitBillApi.pending, (state, _actions) => {
+      state.submitBillLoading = true;
+      state.txnSlip = [];
+    });
+    builder.addCase(submitBillApi.fulfilled, (state, actions) => {
+      state.submitBillLoading = false;
+      const resp = actions.payload;
+      if (successService(resp)) {
+        const txnSlip = resp?.apiResponseData?.responseData;
+        if (!txnSlip?.length > 0) {
+          showSwal({
+            icon: "info",
+            message:
+              resp?.apiResponseData?.responseMessage ||
+              resp?.apiResponseData?.apiResponseMessage,
+          });
+        } else {
+          state.txnSlip = txnSlip;
+        }
+      } else {
+        errorService(resp);
+      }
+    });
+    builder.addCase(submitBillApi.rejected, (state, _actions) => {
+      state.submitBillLoading = false;
+      state.txnSlip = [];
     });
   },
 });
