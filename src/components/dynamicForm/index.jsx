@@ -96,6 +96,8 @@ const DynamicForm = ({data}) => {
       operatorId: selectedSubBiller?.billerId,
       requestFrom: "WEB",
       serviceType: "BILL_FETCH",
+      customerName: "NA",
+      customerMobile: "NA",
     };
     dispatch(
       setState({

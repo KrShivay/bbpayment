@@ -23,6 +23,7 @@ function useQuery() {
 function Home() {
   const query = useQuery();
   const userId = query.get("uId");
+  const token = query.get("token");
   const dispatch = useDispatch();
   const {
     paymentAuthToken,
@@ -36,12 +37,12 @@ function Home() {
   } = useSelector((state) => state.bbpsSlice);
 
   useEffect(() => {
-    if (!paymentAuthToken) {
+    if (!paymentAuthToken && !token) {
       dispatch(paymentTokenApi(userId));
     } else {
       dispatch(billCategoriesApi({authToken: paymentAuthToken}));
     }
-  }, [paymentAuthToken]);
+  }, [paymentAuthToken, token]);
 
   useEffect(() => {
     if (billCategoriesList[selectedTab]) {
@@ -61,6 +62,7 @@ function Home() {
         <Grid item xs={12}>
           <BackToHome />
         </Grid>
+
         <Grid item xs={12}>
           <Card variant="outlined">
             <Header
@@ -69,7 +71,8 @@ function Home() {
             />
           </Card>
         </Grid>
-        <Grid item xs={3}>
+
+        <Grid item xs={12} sm={4} md={3}>
           <Card variant="outlined" className="p-2">
             <Typography variant="h6" color="primary" className="my-2">
               {toTitleCase(billCategoriesList[selectedTab])} Sub Billers
@@ -80,7 +83,8 @@ function Home() {
             />
           </Card>
         </Grid>
-        <Grid item xs={6}>
+
+        <Grid item xs={12} sm={8} md={6}>
           <Card variant="outlined" className="p-2">
             <Typography variant="h6" color="primary" className="my-2">
               {toTitleCase(selectedSubBiller.billerName)} Biller Form
@@ -88,7 +92,8 @@ function Home() {
             <DynamicForm data={selectedSubBiller?.customerParams || []} />
           </Card>
         </Grid>
-        <Grid item xs={3}>
+
+        <Grid item xs={12} sm={4} md={3}>
           <Card variant="outlined" className="p-2">
             <Typography variant="h6" color="primary" className="my-2">
               Quick Links

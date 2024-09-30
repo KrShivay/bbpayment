@@ -60,6 +60,7 @@ const bbpsSlice = createSlice({
   initialState: {
     paymentTokenApiLoading: false,
     paymentAuthToken: sessionStorage.getItem("paymentAuthToken"),
+    redirectUrl: "",
     billCategoriesApiLoading: false,
     billCategoriesList: [],
     billerForCategoriesApiLoading: false,
@@ -117,6 +118,7 @@ const bbpsSlice = createSlice({
       if (successService(resp)) {
         const paymentAuthToken =
           resp?.apiResponseData?.responseData?.accessToken;
+        state.redirectUrl = resp?.apiResponseData?.responseData?.redirectUrl;
         if (!paymentAuthToken) {
           showSwal({
             icon: "info",
@@ -213,10 +215,7 @@ const bbpsSlice = createSlice({
       if (successService(resp)) {
         // const billDataResponse = resp?.apiResponseData?.responseData?.billData;
         const billDataResponse = {
-          ...JSON.parse(
-            resp?.apiResponseData?.responseData?.billData.txnResponse
-              .billDetails
-          ),
+          ...resp?.apiResponseData?.responseData,
           txnDateTime:
             resp?.apiResponseData?.responseData?.billData.txnDateTime,
         };
